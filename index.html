@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>World Dish Challenge</title>
+
+<!-- PWA / "Add to Home Screen" support -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#c0392b" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Dish Challenge" />
+<link rel="apple-touch-icon" href="icon.png" />
+
+<style>
+  html, body { margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
+</style>
+
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+
+
+const COUNTRIES = [
+  { country: "Afghanistan", dish: "Kabuli Pulao", flag: "🇦🇫" },
+  { country: "Albania", dish: "Tavë Kosi", flag: "🇦🇱" },
+  { country: "Algeria", dish: "Couscous", flag: "🇩🇿" },
+  { country: "Andorra", dish: "Escudella", flag: "🇦🇩" },
+  { country: "Angola", dish: "Muamba de Galinha", flag: "🇦🇴" },
+  { country: "Argentina", dish: "Asado", flag: "🇦🇷" },
+  { country: "Armenia", dish: "Khorovats", flag: "🇦🇲" },
+  { country: "Australia", dish: "Meat Pie", flag: "🇦🇺" },
+  { country: "Austria", dish: "Wiener Schnitzel", flag: "🇦🇹" },
+  { country: "Azerbaijan", dish: "Plov", flag: "🇦🇿" },
+  { country: "Bahamas", dish: "Cracked Conch", flag: "🇧🇸" },
+  { country: "Bahrain", dish: "Machboos", flag: "🇧🇭" },
+  { country: "Bangladesh", dish: "Hilsa Fish Curry", flag: "🇧🇩" },
+  { country: "Barbados", dish: "Cou-Cou & Flying Fish", flag: "🇧🇧" },
+  { country: "Belarus", dish: "Draniki", flag: "🇧🇾" },
+  { country: "Belgium", dish: "Moules-Frites", flag: "🇧🇪" },
+  { country: "Belize", dish: "Rice and Beans", flag: "🇧🇿" },
+  { country: "Benin", dish: "Kuli-Kuli", flag: "🇧🇯" },
+  { country: "Bhutan", dish: "Ema Datshi", flag: "🇧🇹" },
+  { country: "Bolivia", dish: "Salteñas", flag: "🇧🇴" },
+  { country: "Bosnia & Herzegovina", dish: "Ćevapi", flag: "🇧🇦" },
+  { country: "Botswana", dish: "Seswaa", flag: "🇧🇼" },
+  { country: "Brazil", dish: "Feijoada", flag: "🇧🇷" },
+  { country: "Brunei", dish: "Ambuyat", flag: "🇧🇳" },
+  { country: "Bulgaria", dish: "Banitsa", flag: "🇧🇬" },
+  { country: "Burkina Faso", dish: "Tô", flag: "🇧🇫" },
+  { country: "Burundi", dish: "Boko Boko", flag: "🇧🇮" },
+  { country: "Cambodia", dish: "Fish Amok", flag: "🇰🇭" },
+  { country: "Cameroon", dish: "Ndolé", flag: "🇨🇲" },
+  { country: "Canada", dish: "Poutine", flag: "🇨🇦" },
+  { country: "Cape Verde", dish: "Cachupa", flag: "🇨🇻" },
+  { country: "Central African Republic", dish: "Sangha", flag: "🇨🇫" },
+  { country: "Chad", dish: "Daraba", flag: "🇹🇩" },
+  { country: "Chile", dish: "Cazuela", flag: "🇨🇱" },
+  { country: "China", dish: "Peking Duck", flag: "🇨🇳" },
+  { country: "Colombia", dish: "Bandeja Paisa", flag: "🇨🇴" },
+  { country: "Comoros", dish: "Langouste à la Vanille", flag: "🇰🇲" },
+  { country: "Congo (DRC)", dish: "Moambe Chicken", flag: "🇨🇩" },
+  { country: "Costa Rica", dish: "Gallo Pinto", flag: "🇨🇷" },
+  { country: "Croatia", dish: "Peka", flag: "🇭🇷" },
+  { country: "Cuba", dish: "Ropa Vieja", flag: "🇨🇺" },
+  { country: "Cyprus", dish: "Souvlakia", flag: "🇨🇾" },
+  { country: "Czech Republic", dish: "Svíčková", flag: "🇨🇿" },
+  { country: "Denmark", dish: "Stegt Flæsk", flag: "🇩🇰" },
+  { country: "Djibouti", dish: "Skoudehkaris", flag: "🇩🇯" },
+  { country: "Dominican Republic", dish: "La Bandera", flag: "🇩🇴" },
+  { country: "Ecuador", dish: "Seco de Pollo", flag: "🇪🇨" },
+  { country: "Egypt", dish: "Koshari", flag: "🇪🇬" },
+  { country: "El Salvador", dish: "Pupusas", flag: "🇸🇻" },
+  { country: "Equatorial Guinea", dish: "Succotash", flag: "🇬🇶" },
+  { country: "Eritrea", dish: "Injera & Tsebhi", flag: "🇪🇷" },
+  { country: "Estonia", dish: "Verivorst", flag: "🇪🇪" },
+  { country: "Eswatini", dish: "Karoo Lamb", flag: "🇸🇿" },
+  { country: "Ethiopia", dish: "Injera & Doro Wat", flag: "🇪🇹" },
+  { country: "Fiji", dish: "Kokoda", flag: "🇫🇯" },
+  { country: "Finland", dish: "Karjalanpiirakka", flag: "🇫🇮" },
+  { country: "France", dish: "Pot-au-Feu", flag: "🇫🇷" },
+  { country: "Gabon", dish: "Poulet Nyembwe", flag: "🇬🇦" },
+  { country: "Gambia", dish: "Benachin", flag: "🇬🇲" },
+  { country: "Georgia", dish: "Khachapuri", flag: "🇬🇪" },
+  { country: "Germany", dish: "Sauerbraten", flag: "🇩🇪" },
+  { country: "Ghana", dish: "Fufu & Soup", flag: "🇬🇭" },
+  { country: "Greece", dish: "Moussaka", flag: "🇬🇷" },
+  { country: "Guatemala", dish: "Pepián", flag: "🇬🇹" },
+  { country: "Guinea", dish: "Jollof Rice", flag: "🇬🇳" },
+  { country: "Guinea-Bissau", dish: "Caldo de Mancarra", flag: "🇬🇼" },
+  { country: "Guyana", dish: "Pepperpot", flag: "🇬🇾" },
+  { country: "Haiti", dish: "Griot", flag: "🇭🇹" },
+  { country: "Honduras", dish: "Baleadas", flag: "🇭🇳" },
+  { country: "Hungary", dish: "Gulyás", flag: "🇭🇺" },
+  { country: "Iceland", dish: "Skyr & Hákarl", flag: "🇮🇸" },
+  { country: "India", dish: "Khichdi", flag: "🇮🇳" },
+  { country: "Indonesia", dish: "Nasi Goreng", flag: "🇮🇩" },
+  { country: "Iran", dish: "Chelow Kabab", flag: "🇮🇷" },
+  { country: "Iraq", dish: "Masgouf", flag: "🇮🇶" },
+  { country: "Ireland", dish: "Irish Stew", flag: "🇮🇪" },
+  { country: "Israel", dish: "Falafel", flag: "🇮🇱" },
+  { country: "Italy", dish: "Ragù alla Bolognese", flag: "🇮🇹" },
+  { country: "Ivory Coast", dish: "Foutou & Sauce Graine", flag: "🇨🇮" },
+  { country: "Jamaica", dish: "Ackee & Saltfish", flag: "🇯🇲" },
+  { country: "Japan", dish: "Sushi", flag: "🇯🇵" },
+  { country: "Jordan", dish: "Mansaf", flag: "🇯🇴" },
+  { country: "Kazakhstan", dish: "Beshbarmak", flag: "🇰🇿" },
+  { country: "Kenya", dish: "Ugali & Nyama Choma", flag: "🇰🇪" },
+  { country: "Kosovo", dish: "Flija", flag: "🇽🇰" },
+  { country: "Kuwait", dish: "Machboos", flag: "🇰🇼" },
+  { country: "Kyrgyzstan", dish: "Beshbarmak", flag: "🇰🇬" },
+  { country: "Laos", dish: "Laap", flag: "🇱🇦" },
+  { country: "Latvia", dish: "Grey Peas with Bacon", flag: "🇱🇻" },
+  { country: "Lebanon", dish: "Kibbeh", flag: "🇱🇧" },
+  { country: "Lesotho", dish: "Papa", flag: "🇱🇸" },
+  { country: "Liberia", dish: "Jollof Rice", flag: "🇱🇷" },
+  { country: "Libya", dish: "Bazeen", flag: "🇱🇾" },
+  { country: "Liechtenstein", dish: "Käsknöpfle", flag: "🇱🇮" },
+  { country: "Lithuania", dish: "Cepelinai", flag: "🇱🇹" },
+  { country: "Luxembourg", dish: "Judd mat Gaardebounen", flag: "🇱🇺" },
+  { country: "Madagascar", dish: "Romazava", flag: "🇲🇬" },
+  { country: "Malawi", dish: "Nsima & Ndiwo", flag: "🇲🇼" },
+  { country: "Malaysia", dish: "Nasi Lemak", flag: "🇲🇾" },
+  { country: "Maldives", dish: "Garudhiya", flag: "🇲🇻" },
+  { country: "Mali", dish: "Tiguadege Na", flag: "🇲🇱" },
+  { country: "Malta", dish: "Fenek Moqli", flag: "🇲🇹" },
+  { country: "Mauritania", dish: "Thieboudienne", flag: "🇲🇷" },
+  { country: "Mauritius", dish: "Dholl Puri", flag: "🇲🇺" },
+  { country: "Mexico", dish: "Mole Poblano", flag: "🇲🇽" },
+  { country: "Moldova", dish: "Mămăligă", flag: "🇲🇩" },
+  { country: "Monaco", dish: "Barbagiuan", flag: "🇲🇨" },
+  { country: "Mongolia", dish: "Buuz", flag: "🇲🇳" },
+  { country: "Montenegro", dish: "Kačamak", flag: "🇲🇪" },
+  { country: "Morocco", dish: "Couscous & Tagine", flag: "🇲🇦" },
+  { country: "Mozambique", dish: "Piri Piri Chicken", flag: "🇲🇿" },
+  { country: "Myanmar", dish: "Mohinga", flag: "🇲🇲" },
+  { country: "Namibia", dish: "Biltong", flag: "🇳🇦" },
+  { country: "Nepal", dish: "Dal Bhat", flag: "🇳🇵" },
+  { country: "Netherlands", dish: "Stamppot", flag: "🇳🇱" },
+  { country: "New Zealand", dish: "Hāngī", flag: "🇳🇿" },
+  { country: "Nicaragua", dish: "Gallo Pinto", flag: "🇳🇮" },
+  { country: "Niger", dish: "Djerma Stew", flag: "🇳🇪" },
+  { country: "Nigeria", dish: "Jollof Rice", flag: "🇳🇬" },
+  { country: "North Korea", dish: "Kimchi", flag: "🇰🇵" },
+  { country: "North Macedonia", dish: "Tavče Gravče", flag: "🇲🇰" },
+  { country: "Norway", dish: "Fårikål", flag: "🇳🇴" },
+  { country: "Oman", dish: "Shuwa", flag: "🇴🇲" },
+  { country: "Pakistan", dish: "Nihari", flag: "🇵🇰" },
+  { country: "Palestine", dish: "Musakhan", flag: "🇵🇸" },
+  { country: "Panama", dish: "Sancocho", flag: "🇵🇦" },
+  { country: "Papua New Guinea", dish: "Mumu", flag: "🇵🇬" },
+  { country: "Paraguay", dish: "Sopa Paraguaya", flag: "🇵🇾" },
+  { country: "Peru", dish: "Ceviche", flag: "🇵🇪" },
+  { country: "Philippines", dish: "Adobo", flag: "🇵🇭" },
+  { country: "Poland", dish: "Bigos", flag: "🇵🇱" },
+  { country: "Portugal", dish: "Bacalhau", flag: "🇵🇹" },
+  { country: "Qatar", dish: "Machboos", flag: "🇶🇦" },
+  { country: "Romania", dish: "Sarmale", flag: "🇷🇴" },
+  { country: "Russia", dish: "Beef Stroganoff", flag: "🇷🇺" },
+  { country: "Rwanda", dish: "Brochettes", flag: "🇷🇼" },
+  { country: "Saudi Arabia", dish: "Kabsa", flag: "🇸🇦" },
+  { country: "Senegal", dish: "Thiéboudienne", flag: "🇸🇳" },
+  { country: "Serbia", dish: "Ćevapčići", flag: "🇷🇸" },
+  { country: "Sierra Leone", dish: "Cassava Leaf Stew", flag: "🇸🇱" },
+  { country: "Singapore", dish: "Hainanese Chicken Rice", flag: "🇸🇬" },
+  { country: "Slovakia", dish: "Bryndzové Halušky", flag: "🇸🇰" },
+  { country: "Slovenia", dish: "Kranjska Klobasa", flag: "🇸🇮" },
+  { country: "Somalia", dish: "Bariis Iskukaris", flag: "🇸🇴" },
+  { country: "South Africa", dish: "Bobotie", flag: "🇿🇦" },
+  { country: "South Korea", dish: "Kimchi", flag: "🇰🇷" },
+  { country: "South Sudan", dish: "Ful Medames", flag: "🇸🇸" },
+  { country: "Spain", dish: "Paella", flag: "🇪🇸" },
+  { country: "Sri Lanka", dish: "Rice & Curry", flag: "🇱🇰" },
+  { country: "Sudan", dish: "Ful Medames", flag: "🇸🇩" },
+  { country: "Suriname", dish: "Pom", flag: "🇸🇷" },
+  { country: "Sweden", dish: "Meatballs & Lingonberry", flag: "🇸🇪" },
+  { country: "Switzerland", dish: "Rösti", flag: "🇨🇭" },
+  { country: "Syria", dish: "Kibbeh", flag: "🇸🇾" },
+  { country: "Taiwan", dish: "Beef Noodle Soup", flag: "🇹🇼" },
+  { country: "Tajikistan", dish: "Qurutob", flag: "🇹🇯" },
+  { country: "Tanzania", dish: "Ugali", flag: "🇹🇿" },
+  { country: "Thailand", dish: "Pad Thai", flag: "🇹🇭" },
+  { country: "Timor-Leste", dish: "Ikan Pepes", flag: "🇹🇱" },
+  { country: "Togo", dish: "Fufu & Palm Nut Soup", flag: "🇹🇬" },
+  { country: "Trinidad & Tobago", dish: "Doubles", flag: "🇹🇹" },
+  { country: "Tunisia", dish: "Couscous & Merguez", flag: "🇹🇳" },
+  { country: "Turkey", dish: "Döner Kebab", flag: "🇹🇷" },
+  { country: "Turkmenistan", dish: "Plov", flag: "🇹🇲" },
+  { country: "Uganda", dish: "Rolex", flag: "🇺🇬" },
+  { country: "Ukraine", dish: "Borscht", flag: "🇺🇦" },
+  { country: "United Arab Emirates", dish: "Harees", flag: "🇦🇪" },
+  { country: "United Kingdom", dish: "Chicken Tikka Masala", flag: "🇬🇧" },
+  { country: "United States", dish: "Apple Pie / Hamburger", flag: "🇺🇸" },
+  { country: "Uruguay", dish: "Asado", flag: "🇺🇾" },
+  { country: "Uzbekistan", dish: "Plov", flag: "🇺🇿" },
+  { country: "Venezuela", dish: "Pabellón Criollo", flag: "🇻🇪" },
+  { country: "Vietnam", dish: "Phở", flag: "🇻🇳" },
+  { country: "Yemen", dish: "Saltah", flag: "🇾🇪" },
+  { country: "Zambia", dish: "Nshima & Relish", flag: "🇿🇲" },
+  { country: "Zimbabwe", dish: "Sadza & Nyama", flag: "🇿🇼" },
+];
+
+const RATING_OPTIONS = [
+  { value: 5, label: "🌟 Legendary", color: "#e8a020" },
+  { value: 4, label: "😍 Loved It", color: "#4caf7d" },
+  { value: 3, label: "😊 Good", color: "#4a90d9" },
+  { value: 2, label: "😐 Okay", color: "#9b8ea0" },
+  { value: 1, label: "😬 Not For Me", color: "#c0392b" },
+];
+
+const STORAGE_KEY = "national-dish-tracker-v1";
+
+function getRatingStyle(rating) {
+  const opt = RATING_OPTIONS.find((r) => r.value === rating);
+  return opt ? opt.color : "#ccc";
+}
+
+function Stars({ rating }) {
+  return (
+    <span style={{ letterSpacing: 1 }}>
+      {[1, 2, 3, 4, 5].map((s) => (
+        <span key={s} style={{ color: s <= rating ? "#e8a020" : "#ddd", fontSize: 14 }}>★</span>
+      ))}
+    </span>
+  );
+}
+
+function App() {
+  const [entries, setEntries] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("country");
+  const [activeTab, setActiveTab] = useState("tracker");
+  const [editingCountry, setEditingCountry] = useState(null);
+  const [draftRating, setDraftRating] = useState(null);
+  const [draftNotes, setDraftNotes] = useState("");
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+    catch {}
+  }, [entries]);
+
+  const cooked = Object.keys(entries).length;
+  const total = COUNTRIES.length;
+  const progress = Math.round((cooked / total) * 100);
+  const avgRating = cooked
+    ? (Object.values(entries).reduce((s, e) => s + e.rating, 0) / cooked).toFixed(1)
+    : null;
+
+  const openEdit = (country) => {
+    const existing = entries[country.country];
+    setEditingCountry(country);
+    setDraftRating(existing?.rating ?? null);
+    setDraftNotes(existing?.notes ?? "");
+  };
+
+  const saveEntry = () => {
+    if (!draftRating) return;
+    setEntries((prev) => ({
+      ...prev,
+      [editingCountry.country]: { rating: draftRating, notes: draftNotes, date: new Date().toLocaleDateString() },
+    }));
+    setEditingCountry(null);
+  };
+
+  const removeEntry = (countryName) => {
+    setEntries((prev) => {
+      const next = { ...prev };
+      delete next[countryName];
+      return next;
+    });
+  };
+
+  const filtered = COUNTRIES.filter((c) => {
+    const q = search.toLowerCase();
+    const matchSearch = c.country.toLowerCase().includes(q) || c.dish.toLowerCase().includes(q);
+    const hasCooking = entries[c.country];
+    if (filterStatus === "cooked") return matchSearch && hasCooking;
+    if (filterStatus === "uncooked") return matchSearch && !hasCooking;
+    return matchSearch;
+  }).sort((a, b) => {
+    if (sortBy === "rating") {
+      const ra = entries[a.country]?.rating ?? 0;
+      const rb = entries[b.country]?.rating ?? 0;
+      return rb - ra;
+    }
+    return a.country.localeCompare(b.country);
+  });
+
+  const leaderboard = [...COUNTRIES]
+    .filter((c) => entries[c.country])
+    .sort((a, b) => (entries[b.country]?.rating ?? 0) - (entries[a.country]?.rating ?? 0))
+    .slice(0, 20);
+
+  const ratingBreakdown = RATING_OPTIONS.map((opt) => ({
+    ...opt,
+    count: Object.values(entries).filter((e) => e.rating === opt.value).length,
+  }));
+
+  return (
+    <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#faf7f2", minHeight: "100vh", color: "#2c1f0e" }}>
+      {/* Header */}
+      <div style={{ background: "linear-gradient(135deg, #c0392b 0%, #922b21 100%)", padding: "28px 24px 20px", color: "white" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div style={{ fontSize: 13, letterSpacing: 3, textTransform: "uppercase", opacity: 0.75, marginBottom: 4 }}>Summer 2026</div>
+          <h1 style={{ margin: "0 0 4px", fontSize: 28, fontWeight: 800, letterSpacing: -0.5 }}>🌍 World Dish Challenge</h1>
+          <p style={{ margin: "0 0 20px", opacity: 0.85, fontSize: 14 }}>Cook every country's national dish & rank them</p>
+
+          {/* Stats bar */}
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+            {[
+              { label: "Cooked", value: `${cooked} / ${total}` },
+              { label: "Progress", value: `${progress}%` },
+              { label: "Avg Rating", value: avgRating ? `${avgRating} ★` : "—" },
+              { label: "Remaining", value: total - cooked },
+            ].map((s) => (
+              <div key={s.label} style={{ background: "rgba(255,255,255,0.15)", borderRadius: 10, padding: "10px 16px", minWidth: 80 }}>
+                <div style={{ fontSize: 20, fontWeight: 700 }}>{s.value}</div>
+                <div style={{ fontSize: 11, opacity: 0.8, textTransform: "uppercase", letterSpacing: 1 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ marginTop: 16, background: "rgba(255,255,255,0.2)", borderRadius: 99, height: 8 }}>
+            <div style={{ background: "#f9ca24", borderRadius: 99, height: 8, width: `${progress}%`, transition: "width 0.4s" }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #eae4db", position: "sticky", top: 0, zIndex: 10 }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", display: "flex" }}>
+          {[["tracker", "📋 Tracker"], ["leaderboard", "🏆 Rankings"]].map(([id, label]) => (
+            <button key={id} onClick={() => setActiveTab(id)}
+              style={{ padding: "14px 22px", border: "none", background: "none", cursor: "pointer", fontSize: 14, fontWeight: 600,
+                color: activeTab === id ? "#c0392b" : "#8a7560",
+                borderBottom: activeTab === id ? "2px solid #c0392b" : "2px solid transparent" }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 16px" }}>
+
+        {activeTab === "tracker" && (
+          <>
+            {/* Filters */}
+            <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+              <input value={search} onChange={(e) => setSearch(e.target.value)}
+                placeholder="🔍 Search country or dish…"
+                style={{ flex: 1, minWidth: 180, padding: "10px 14px", borderRadius: 10, border: "1px solid #ddd", fontSize: 14, background: "#fff" }} />
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+                style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", fontSize: 13, background: "#fff" }}>
+                <option value="all">All ({total})</option>
+                <option value="cooked">Cooked ({cooked})</option>
+                <option value="uncooked">Not yet ({total - cooked})</option>
+              </select>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
+                style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", fontSize: 13, background: "#fff" }}>
+                <option value="country">A–Z</option>
+                <option value="rating">By Rating</option>
+              </select>
+            </div>
+
+            {/* Country list */}
+            <div style={{ display: "grid", gap: 8 }}>
+              {filtered.map((c) => {
+                const entry = entries[c.country];
+                return (
+                  <div key={c.country}
+                    style={{ background: "#fff", borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
+                      border: entry ? `2px solid ${getRatingStyle(entry.rating)}22` : "2px solid #f0ebe3",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                    <span style={{ fontSize: 24 }}>{c.flag}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>{c.country}</div>
+                      <div style={{ color: "#9a8570", fontSize: 12, marginTop: 1 }}>{c.dish}</div>
+                      {entry?.notes && (
+                        <div style={{ color: "#7a6a55", fontSize: 12, marginTop: 4, fontStyle: "italic", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+                          "{entry.notes}"
+                        </div>
+                      )}
+                    </div>
+                    {entry ? (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                        <Stars rating={entry.rating} />
+                        <div style={{ fontSize: 11, color: "#b0a090" }}>{entry.date}</div>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button onClick={() => openEdit(c)}
+                            style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, border: "1px solid #ddd", background: "#f9f6f1", cursor: "pointer", color: "#6a5a45" }}>
+                            Edit
+                          </button>
+                          <button onClick={() => removeEntry(c.country)}
+                            style={{ fontSize: 11, padding: "3px 8px", borderRadius: 6, border: "1px solid #fcc", background: "#fff5f5", cursor: "pointer", color: "#c0392b" }}>
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => openEdit(c)}
+                        style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "#c0392b", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
+                        + Rate
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {activeTab === "leaderboard" && (
+          <div>
+            {/* Rating breakdown */}
+            <div style={{ background: "#fff", borderRadius: 14, padding: 20, marginBottom: 20, border: "1px solid #eae4db" }}>
+              <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 700 }}>Rating Breakdown</h3>
+              {ratingBreakdown.map((r) => (
+                <div key={r.value} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <div style={{ width: 120, fontSize: 13, color: "#5a4a35" }}>{r.label}</div>
+                  <div style={{ flex: 1, background: "#f0ebe3", borderRadius: 99, height: 10 }}>
+                    <div style={{ background: r.color, borderRadius: 99, height: 10, width: cooked ? `${(r.count / cooked) * 100}%` : "0%", transition: "width 0.4s" }} />
+                  </div>
+                  <div style={{ width: 24, textAlign: "right", fontSize: 13, fontWeight: 600 }}>{r.count}</div>
+                </div>
+              ))}
+            </div>
+
+            {leaderboard.length === 0 ? (
+              <div style={{ textAlign: "center", padding: 48, color: "#b0a090" }}>
+                <div style={{ fontSize: 48, marginBottom: 12 }}>🍽️</div>
+                <div style={{ fontSize: 16, fontWeight: 600 }}>No dishes rated yet</div>
+                <div style={{ fontSize: 14, marginTop: 6 }}>Head to the Tracker tab and start cooking!</div>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gap: 8 }}>
+                {leaderboard.map((c, i) => {
+                  const entry = entries[c.country];
+                  const medals = ["🥇", "🥈", "🥉"];
+                  return (
+                    <div key={c.country}
+                      style={{ background: "#fff", borderRadius: 12, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
+                        border: `2px solid ${getRatingStyle(entry.rating)}33`, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                      <div style={{ fontSize: i < 3 ? 24 : 16, width: 28, textAlign: "center", fontWeight: 700, color: "#9a8570" }}>
+                        {i < 3 ? medals[i] : `#${i + 1}`}
+                      </div>
+                      <span style={{ fontSize: 22 }}>{c.flag}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>{c.country}</div>
+                        <div style={{ color: "#9a8570", fontSize: 12 }}>{c.dish}</div>
+                        {entry.notes && <div style={{ color: "#7a6a55", fontSize: 12, fontStyle: "italic", marginTop: 2 }}>"{entry.notes}"</div>}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                        <Stars rating={entry.rating} />
+                        <div style={{ fontSize: 11, color: "#b0a090", marginTop: 2 }}>{entry.date}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Rating modal */}
+      {editingCountry && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 18, padding: 28, width: "100%", maxWidth: 400, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{ fontSize: 40 }}>{editingCountry.flag}</div>
+              <h2 style={{ margin: "8px 0 2px", fontSize: 20, fontWeight: 800 }}>{editingCountry.country}</h2>
+              <div style={{ color: "#9a8570", fontSize: 14 }}>{editingCountry.dish}</div>
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#5a4a35" }}>How was it?</div>
+              <div style={{ display: "grid", gap: 8 }}>
+                {RATING_OPTIONS.map((opt) => (
+                  <button key={opt.value} onClick={() => setDraftRating(opt.value)}
+                    style={{ padding: "12px 16px", borderRadius: 10, border: `2px solid ${draftRating === opt.value ? opt.color : "#eae4db"}`,
+                      background: draftRating === opt.value ? `${opt.color}18` : "#faf7f2",
+                      cursor: "pointer", textAlign: "left", fontSize: 14, fontWeight: draftRating === opt.value ? 700 : 500,
+                      color: draftRating === opt.value ? opt.color : "#5a4a35", transition: "all 0.15s" }}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, color: "#5a4a35" }}>Notes (optional)</div>
+              <textarea value={draftNotes} onChange={(e) => setDraftNotes(e.target.value)}
+                placeholder="Any thoughts, tweaks, or memories…"
+                style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", fontSize: 13, resize: "vertical", minHeight: 72, boxSizing: "border-box", fontFamily: "inherit" }} />
+            </div>
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setEditingCountry(null)}
+                style={{ flex: 1, padding: "12px", borderRadius: 10, border: "1px solid #ddd", background: "#f5f0ea", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#8a7560" }}>
+                Cancel
+              </button>
+              <button onClick={saveEntry} disabled={!draftRating}
+                style={{ flex: 2, padding: "12px", borderRadius: 10, border: "none", background: draftRating ? "#c0392b" : "#ddd",
+                  color: "white", cursor: draftRating ? "pointer" : "not-allowed", fontSize: 14, fontWeight: 700 }}>
+                Save Rating
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

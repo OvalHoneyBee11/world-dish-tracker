@@ -1,0 +1,12 @@
+{
+  "name": "World Dish Challenge",
+  "short_name": "Dish Challenge",
+  "description": "Cook every country's national dish and rank them",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#c0392b",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
