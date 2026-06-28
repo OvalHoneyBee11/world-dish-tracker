@@ -220,11 +220,11 @@ const COUNTRIES = [
 ];
 
 const RATING_OPTIONS = [
-  { value: 5, label: "🌟 Legendary", color: "#e8a020" },
-  { value: 4, label: "😍 Loved It", color: "#4caf7d" },
-  { value: 3, label: "😊 Good", color: "#4a90d9" },
-  { value: 2, label: "😐 Okay", color: "#9b8ea0" },
-  { value: 1, label: "😬 Not For Me", color: "#c0392b" },
+  { value: 5, label: "🌟 Legendary", color: "#e8a020", scoreMin: 8, scoreMax: 10 },
+  { value: 4, label: "😍 Loved It", color: "#4caf7d", scoreMin: 6, scoreMax: 8 },
+  { value: 3, label: "😊 Good", color: "#4a90d9", scoreMin: 4, scoreMax: 6 },
+  { value: 2, label: "😐 Okay", color: "#9b8ea0", scoreMin: 2, scoreMax: 4 },
+  { value: 1, label: "😬 Not For Me", color: "#c0392b", scoreMin: 0, scoreMax: 2 },
 ];
 
 const STORAGE_KEY = "national-dish-tracker-v1";
@@ -282,7 +282,11 @@ function App() {
 
   const saveEntry = () => {
     if (!draftRating) return;
-    const parsedScore = draftScore.trim() === "" ? null : Math.max(0, Math.min(10, Number(draftScore)));
+    const opt = RATING_OPTIONS.find((r) => r.value === draftRating);
+    let parsedScore = draftScore.trim() === "" ? null : Number(draftScore);
+    if (parsedScore != null && opt) {
+      parsedScore = Math.max(opt.scoreMin, Math.min(opt.scoreMax, parsedScore));
+    }
     setEntries((prev) => ({
       ...prev,
       [editingCountry.country]: {
@@ -333,6 +337,8 @@ function App() {
     ...opt,
     count: Object.values(entries).filter((e) => e.rating === opt.value).length,
   }));
+
+  const currentRatingOpt = RATING_OPTIONS.find((r) => r.value === draftRating) || null;
 
   return (
     <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", background: "#faf7f2", minHeight: "100vh", color: "#2c1f0e" }}>
@@ -525,29 +531,44 @@ function App() {
               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#5a4a35" }}>How was it?</div>
               <div style={{ display: "grid", gap: 8 }}>
                 {RATING_OPTIONS.map((opt) => (
-                  <button key={opt.value} onClick={() => setDraftRating(opt.value)}
+                  <button key={opt.value} onClick={() => {
+                      setDraftRating(opt.value);
+                      const current = draftScore.trim() === "" ? null : Number(draftScore);
+                      if (current == null || current < opt.scoreMin || current > opt.scoreMax) {
+                        setDraftScore(String((opt.scoreMin + opt.scoreMax) / 2));
+                      }
+                    }}
                     style={{ padding: "12px 16px", borderRadius: 10, border: `2px solid ${draftRating === opt.value ? opt.color : "#eae4db"}`,
                       background: draftRating === opt.value ? `${opt.color}18` : "#faf7f2",
                       cursor: "pointer", textAlign: "left", fontSize: 14, fontWeight: draftRating === opt.value ? 700 : 500,
                       color: draftRating === opt.value ? opt.color : "#5a4a35", transition: "all 0.15s" }}>
                     {opt.label}
+                    <span style={{ float: "right", fontSize: 12, fontWeight: 500, opacity: 0.6 }}>{opt.scoreMin}–{opt.scoreMax}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#5a4a35" }}>Score (optional, out of 10)</div>
+              <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, color: "#5a4a35" }}>
+                Score (out of 10){currentRatingOpt && <span style={{ fontWeight: 400, color: "#9a8570" }}> — must be {currentRatingOpt.scoreMin}–{currentRatingOpt.scoreMax}</span>}
+              </div>
               <input
                 type="number"
-                min="0"
-                max="10"
+                min={currentRatingOpt ? currentRatingOpt.scoreMin : 0}
+                max={currentRatingOpt ? currentRatingOpt.scoreMax : 10}
                 step="0.5"
                 inputMode="decimal"
                 value={draftScore}
                 onChange={(e) => setDraftScore(e.target.value)}
-                placeholder="e.g. 8.5"
-                style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", fontFamily: "inherit" }}
+                onBlur={() => {
+                  if (!currentRatingOpt || draftScore.trim() === "") return;
+                  const n = Math.max(currentRatingOpt.scoreMin, Math.min(currentRatingOpt.scoreMax, Number(draftScore)));
+                  setDraftScore(String(n));
+                }}
+                placeholder={currentRatingOpt ? `${currentRatingOpt.scoreMin}–${currentRatingOpt.scoreMax}` : "Pick a rating first"}
+                disabled={!draftRating}
+                style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #ddd", fontSize: 14, boxSizing: "border-box", fontFamily: "inherit", background: draftRating ? "#fff" : "#f5f0ea" }}
               />
             </div>
 
